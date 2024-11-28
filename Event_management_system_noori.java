@@ -4,10 +4,7 @@
  */
 package event_management_system_noori;
 
-/**
- *
- * @author noori
- */
+
 public class Event_management_system_noori {
 
     /**
