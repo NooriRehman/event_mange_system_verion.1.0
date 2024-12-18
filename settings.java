@@ -8,6 +8,10 @@ package event_management_system_noori;
  *
  * @author noori
  */
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
 public class settings extends javax.swing.JFrame {
 
     /**
@@ -154,7 +158,47 @@ public class settings extends javax.swing.JFrame {
         ad.setLocationRelativeTo(null);
        this.dispose();
     }//GEN-LAST:event_back_toadmin_buttonActionPerformed
+private void SetProfileButtonListenerActionPerformed(java.awt.event.ActionEvent evt) { 
+    String fullName = fullNameField.getText().trim();
+    String email = emailField.getText().trim();
+    String contactNo = contactField.getText().trim();
 
+    // Input Validation: Ensure all fields are filled
+    if (fullName.isEmpty() || email.isEmpty() || contactNo.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "All fields are required! Please fill in every detail.", "Input Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // SQL Query to insert data into set_profile table
+    String sql = "INSERT INTO set_profile (full_name, email, contact_no) VALUES (?, ?, ?)";
+
+    try (
+            Connection con = DatabaseConnection.getInstance().getConnection(); 
+            
+         PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+        // Set input values into the query placeholders
+        pstmt.setString(1, fullName);
+        pstmt.setString(2, email);
+        pstmt.setString(3, contactNo);
+
+        // Execute the query
+        int rowsInserted = pstmt.executeUpdate();
+        if (rowsInserted > 0) {
+            JOptionPane.showMessageDialog(this, "Profile saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+ // Clear input fields
+            fullNameField.setText("");
+            emailField.setText("");
+            contactField.setText("");
+        } else {
+            JOptionPane.showMessageDialog(this, "Failed to save profile. Try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+}
+}
     /**
      * @param args the command line arguments
      */
