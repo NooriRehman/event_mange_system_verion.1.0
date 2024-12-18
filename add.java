@@ -216,7 +216,76 @@ public class add extends javax.swing.JFrame {
     }//GEN-LAST:event_event_categoryActionPerformed
 
     private void add_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_buttonActionPerformed
+        private void add_buttonActionPerformed(java.awt.event.ActionEvent evt) {                                           
         // TODO add your handling code here:
+        String eventCategory = eventCategoryField.getSelectedItem().toString();
+    String managerName = managerNameField.getText().trim();
+    String contactNumber = contactNumberField.getText().trim();
+    String timing = timingField.getText().trim();
+    String days = daysField.getText().trim();
+    String eventCapacity = eventCapacityField.getText().trim();
+    String location = locationField.getText().trim();
+
+    // Input validation: Ensure all fields are filled
+    if (eventCategory.isEmpty() || managerName.isEmpty() || contactNumber.isEmpty() ||
+        timing.isEmpty() || days.isEmpty() || eventCapacity.isEmpty() || location.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "All fields are required!", "Input Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+    int capacity;
+    try {
+        capacity = Integer.parseInt(eventCapacity);
+        if (capacity <= 0) {
+            JOptionPane.showMessageDialog(this, "Event capacity must be a positive number!", "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    } catch (NumberFormatException ex) {
+        JOptionPane.showMessageDialog(this, "Event capacity must be a valid number!", "Input Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // SQL Query for inserting data
+    String query = "INSERT INTO adding_events (event_category, manager_name, contact_number, timing, days, event_capacity, location) " +
+                   "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+    try (Connection con = DatabaseConnection.getInstance().getConnection();
+         PreparedStatement ps = con.prepareStatement(query)) {
+        ps.setString(1, eventCategory);
+        ps.setString(2, managerName);
+        ps.setString(3, contactNumber);
+        ps.setString(4, timing);
+        ps.setString(5, days);
+        ps.setInt(6, capacity);
+        ps.setString(7, location);
+
+        // Execute the insert operation
+        int rowsAffected = ps.executeUpdate();
+
+        if (rowsAffected > 0) {
+            JOptionPane.showMessageDialog(this, "Event is created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            
+            // Clear input fields after success
+            eventCategoryField.setSelectedIndex(0);
+            managerNameField.setText("");
+            contactNumberField.setText("");
+            timingField.setText("");
+            daysField.setText("");
+            eventCapacityField.setText("");
+            locationField.setText("");
+        } else {
+            JOptionPane.showMessageDialog(this, "Failed to create the event!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+    } catch (SQLException ex) {
+        if (ex.getSQLState().equals("23000")) { // Unique constraint violation
+            JOptionPane.showMessageDialog(this, "Contact number already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    
+    }
+    }                   
         
     }//GEN-LAST:event_add_buttonActionPerformed
 
